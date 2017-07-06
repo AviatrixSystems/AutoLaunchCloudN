@@ -13,7 +13,7 @@ VMware vSphere PowerCLI provides a Windows PowerShell interface to the vSphere A
 
 ## Git Clone PowerCLI Script ##
 
-https://github.com/AviatrixSystems/AutoLaunchCloudN.git
+git clone https://github.com/AviatrixSystems/AutoLaunchCloudN.git
 
 ## Run PowerCLI script ##
 
