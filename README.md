@@ -55,6 +55,7 @@ git clone https://github.com/AviatrixSystems/AutoLaunchCloudN.git
 5. Do cd to the location of the powercli script
 6. Customize the CloudN information. In the script powercli_launch.ps1, csutomize the following fields:
 
+```parameters
 $cloudn_ip = "10.130.0.10"
 $cloudn_netmask = "255.255.0.0"
 $cloudn_gateway = "10.130.0.1"
@@ -62,6 +63,7 @@ $cloudn_dns1 = "8.8.8.8"
 $cloudn_dns2 = "8.8.4.4"
 $http_proxy = ""
 $https_proxy = ""
+```
 
 6. Type .\powercli_launch.ps1 -Server <ESXi Host IP address> -User <username> -Password <password>, where username is the login of the ESXi host and password is the password of the username for the ESXi host. 
 7. At the completion of the script, you should be able to access CloudN from its web console. Open a browser, and type https://CloudN-private-ip-address, where CloudN-private-ip-address is $cloudn_ip in the above customization code. 
