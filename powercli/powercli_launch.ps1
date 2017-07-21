@@ -15,7 +15,6 @@ param($Server,$User,$Password)
 Connect-VIServer -Server $Server -Protocol https -User $User -Password $Password
 
 
-
 $cloudn_interface = "eth0"
 $cloudn_ip = "10.130.0.10"
 $cloudn_netmask = "255.255.0.0"
@@ -25,6 +24,7 @@ $cloudn_dns2 = "8.8.4.4"
 
 $guestuser = "admin"
 $guestpass ="Aviatrix123#"
+
 # proxy settings disabled
 $http_proxy = ""
 $https_proxy = ""
@@ -121,11 +121,6 @@ if($vm.powerstate -eq "PoweredOn"){
 	
 	if($GuestToolsStatus -eq "toolsOK"){
 		Write-Output "VMWware Tools is OK"
-
-		# test command
-		#Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “pwd” -GuestUser $guestuser -GuestPassword $guestpass -ToolsWaitSecs 30
-		#Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “whoami” -GuestUser $guestuser -GuestPassword $guestpass -ToolsWaitSecs 30
-		#Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “pwd” -GuestUser $guestuser -GuestPassword $guestpass -ToolsWaitSecs 30
 
 		# Setting IP/Netmask/GW/DNS for eth0 interface
 		#
