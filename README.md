@@ -7,8 +7,7 @@ need to manually go through the Booting Up and Initial Configuration section in 
 Before you can use the script for the initial process, CloudN virtual machine has to be launched. Below is a 
 sample ovftool command to launch CloudN VM from a Window's desktop using vmware OVF Tool. (https://www.vmware.com/support/developer/ovf/)
 
-.. 
-
+```command
 Usage: ovftool [options] <source> [<target>]
 
 where
@@ -18,17 +17,17 @@ where
      -n : Specifies target name (CloudN VM name)	 
  
 c:\Program Files\VMware\VMware OVF Tool>ovftool -ds="cwchang-datastore" -n="CloudNVMName" c:\Users\Administrator\Desktop\CloudN-ovf-051517\CloudN-ovf-051517\CloudN-ovf-051517.ovf vi://<ESXi_username>:<ESXi_password>@<ESXi_IP>
-
-..
+```
 
 The output of the above command is as below
+```output
 Opening OVF source: c:\Users\Administrator\Desktop\CloudN-ovf-051517\CloudN-ovf-051517\CloudN-ovf-051517.ovf
 The manifest validates
 Opening VI target: vi://root@10.130.0.2:443/
 Deploying to VI: vi://root@10.130.0.2:443/
 Transfer Completed
 Completed successfully
-
+```
 
 ## Automating CloudN Booting up via PowerCLI Script ##
 
