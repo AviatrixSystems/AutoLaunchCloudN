@@ -8,7 +8,7 @@
 	Mandatory parameter of vSphere/ESXi host, username and password
 	
 .EXAMPLE
-	set_vm_networking.ps1 -Server 10.130.0.2 -User username1 -Password password #>
+	.\powercli_launch.ps1 -Server 10.130.0.2 -User username1 -Password password #>
 	
 	
 param($Server,$User,$Password)
@@ -26,114 +26,111 @@ $guestuser = "admin"
 $guestpass ="Aviatrix123#"
 
 # proxy settings disabled
-$http_proxy = ""
-$https_proxy = ""
+#$http_proxy = ""
+#$https_proxy = ""
 
 # proxy settings enabled
-#$http_proxy = "http://10.130.0.15:3128"
-#$https_proxy = "http://10.130.0.15:3128"
+$http_proxy = "http://10.130.0.15:3128"
+$https_proxy = "http://10.130.0.15:3128"
 
 # check running PowerCLI version
 Get-PowerCLIVersion
 
 # VM name assigned for CloudN by user from vSphere Client
-$vm_name = "CloudN1"
+$vm_name = "My-CloudN"
 $vm = Get-VM $vm_name
 
 
-Function setNetworking ($ip,$netmask,$gateway,$dns1,$dns2,$eth,$guestuser,$guestpass,$http_proxy,$https_proxy){
-	Write-Output "Interface = $eth"
-	Write-Output "IP address = $ip"
-	Write-Output "Netmask = $netmask"
-	Write-Output "Gateway = $gateway"
-	Write-Output "DNS = $dns1 $dns2"
-	Write-Output "Guest Username = $guestuser"
-	Write-Output "Guest Password = $guestpass"
-	Write-Output "http_proxy = $http_proxy"
-	Write-Output "https_proxy = $https_proxy"
+Function setNetworking ($ip,$netmask,$gateway,$dns1,$dns2,$guestuser,$guestpass,$http_proxy,$https_proxy){
+
+    Write-Host "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" -foreground cyan
+	Write-Host "IP address = $ip" 
+	Write-Host "Netmask = $netmask"
+	Write-Host "Gateway = $gateway"
+	Write-Host "DNS = $dns1 $dns2"
+	Write-Host "Guest Username = $guestuser"
+	Write-Host "Guest Password = $guestpass"
+	Write-Host "http_proxy = $http_proxy"
+	Write-Host "https_proxy = $https_proxy"
+	Write-Host "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" -foreground cyan
+	Write-Host
+	Sleep 5
 	
-	# create a temp file
-	$pathfile="/etc/network/tempfile"
-	$text1="sudo touch /etc/network/tempfile"
-	$text2="sudo chmod 777 /etc/network/tempfile" 
-	$interface="sudo cp /etc/network/tempfile /etc/network/interfaces"
-	$remove="sudo rm /etc/network/tempfile"
-	$toggle="sudo ifdown eth0; ifup eth0"
+	$path="export LD_LIBRARY_PATH=/usr/local/lib; export CLISH_PATH=/etc/cloudx; clish -c"
 	
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $text1 -GuestUser $guestuser -GuestPassword $guestpass
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $text2 -GuestUser $guestuser -GuestPassword $guestpass
+	$setup = @{
+		Ip = $ip
+		Netmask = $netmask
+		Gateway = $gateway
+		DNS1 = $dns1
+		DNS2 = $dns2
+		Proxy_False = "proxy false"
+		Proxy_True = "proxy true"
+		Command = "setup_interface_static_address"
+		Path = $path
+	}
+	$proxy = @{
+		https = $https_proxy
+		http = $http_proxy
+		command = "setup_network_proxy"
+		test = "test"
+		save = "save"
+	}	
+	
+	$setup_static_ip="$($setup.command) $($setup.Ip) $($setup.Netmask) $($setup.Gateway) $($setup.DNS1) $($setup.DNS2)" 
+	$setup_proxy="$($setup.Path) $($proxy.command) $($proxy.action) $($proxy.http_proxy) $($proxy.https_proxy)"
 		
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "echo auto lo >> $pathfile" -GuestUser $guestuser -GuestPassword $guestpass
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "echo iface lo inet loopback >> $pathfile" -GuestUser $guestuser -GuestPassword $guestpass
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "echo  >> $pathfile" -GuestUser $guestuser -GuestPassword $guestpass
-
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "echo auto $eth >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass 
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo iface $eth inet static >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass 
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo address $ip >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass 
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo netmask $netmask  >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass 
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo gateway $gateway >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo dns-nameservers $dns1 $dns2 >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass 
-	
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "echo  >> $pathfile" -GuestUser $guestuser -GuestPassword $guestpass
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo auto eth1 >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass 
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo iface eth1 inet static >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass 
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo address 0.0.0.0 >> $pathfile” -GuestUser $guestuser -GuestPassword $guestpass 
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $interface -GuestUser $guestuser -GuestPassword $guestpass
-	Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $toggle -GuestUser $guestuser -GuestPassword $guestpass
-	
-	
 	if($http_proxy -ne "" -And $https_proxy -ne ""){
-		$proxyfile="/etc/environment"
-		$text1="sudo cp /etc/environment /etc/dummyfile"
-		$text2="sudo chmod 777 /etc/dummyfile"
-		$no_proxy="127.0.0.1," + $ip + ",169.254.169.254" 
-		$text3="sudo cp /etc/dummyfile /etc/environment"
-		$text4="sudo rm /etc/dummyfile"
-		$local="sudo /etc/rc.local"
-			
-		Write-Output ""
-		Write-Output "http_proxy = $http_proxy"
-		Write-Output "https_proxy = $https_proxy"
-		Write-Output "no_proxy = $no_proxy"
-
-
-		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $text1 -GuestUser $guestuser -GuestPassword $guestpass
-		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $text2 -GuestUser $guestuser -GuestPassword $guestpass
-
-		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo http_proxy=$http_proxy >> /etc/dummyfile” -GuestUser $guestuser -GuestPassword $guestpass
-		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo https_proxy=$https_proxy >> /etc/dummyfile” -GuestUser $guestuser -GuestPassword $guestpass
-		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText “echo no_proxy=$no_proxy >> /etc/dummyfile” -GuestUser $guestuser -GuestPassword $guestpass
-
-		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $text3 -GuestUser $guestuser -GuestPassword $guestpass
-		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $text4 -GuestUser $guestuser -GuestPassword $guestpass
-		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText $local -GuestUser $guestuser -GuestPassword $guestpass
+		
+		Write-Host "Setting IP address with proxy enabled" -foreground yellow
+		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "$($setup.Path) '$setup_static_ip $($setup.Proxy_True)'" -GuestUser $guestuser -GuestPassword $guestpass 
+		
+		Write-Host "Check Aviatrix CloudN assigned ip address" -foreground yellow
+		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "$($setup.Path) 'show_interface_address'" -GuestUser $guestuser -GuestPassword $guestpass
+		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "$($setup.Path) 'test_internet_connection'" -GuestUser $guestuser -GuestPassword $guestpass
+		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "$($setup.Path) '$($proxy.command) $($proxy.test) --http_proxy $($proxy.http) --https_proxy $($proxy.https)'" -GuestUser $guestuser -GuestPassword $guestpass
+		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "$($setup.Path) '$($proxy.command) $($proxy.save) --http_proxy $($proxy.http) --https_proxy $($proxy.https)'" -GuestUser $guestuser -GuestPassword $guestpass
 
 	} else{
-		Write-Output "Https Proxy not enabled"
+		
+		Write-Host "Setting IP address with no proxy" -foreground cyan
+		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "$($setup.Path) '$setup_static_ip $($setup.Proxy_False)'" -GuestUser $guestuser -GuestPassword $guestpass 
+		
+		
+		Invoke-VMScript -VM $vm -ScriptType Bash -ScriptText "$($setup.Path) show_interface_address" -GuestUser $guestuser -GuestPassword $guestpass
 	}
 }
 
 if($vm.powerstate -eq "PoweredOn"){
-	Write-Output "Guest VM is PoweredON"
+	Write-Host "Guest VM is PoweredON" -foreground green
 	
 	# Check installed VMware Tools inside VM
     $GuestToolsStatus=(Get-View $vm.Id -Property Guest).Guest.ToolsStatus
 	
 	if($GuestToolsStatus -eq "toolsOK"){
-		Write-Output "VMWware Tools is OK"
+		Write-Host "VMWware Tools is OK" -foreground green
 
-		# Setting IP/Netmask/GW/DNS for eth0 interface
-		#
-		setNetworking -ip $cloudn_ip -netmask $cloudn_netmask -gateway $cloudn_gateway -dns1 $cloudn_dns1 -dns2 $cloudn_dns2 -eth $cloudn_interface -guestuser $guestuser -guestpass $guestpass -http_proxy $http_proxy -https_proxy $https_proxy
+		setNetworking -ip $cloudn_ip -netmask $cloudn_netmask -gateway $cloudn_gateway -dns1 $cloudn_dns1 -dns2 $cloudn_dns2 -guestuser $guestuser -guestpass 	$guestpass -http_proxy $http_proxy -https_proxy $https_proxy
 
  	}else{
-		Write-Output "vmtoolsd not running, please re-install VMware Tools to guest VM"
+		Write-Host "vmtoolsd not running, please re-install VMware Tools to guest VM" -foreground red
 		Disconnect-VIServer -confirm:$false -Server $Server
 	}
 }else{
-	Start-VM -VM $vm_name
-	sleep 20
-	setNetworking -ip $cloudn_ip -netmask $cloudn_netmask -gateway $cloudn_gateway -dns1 $cloudn_dns1 -dns2 $cloudn_dns2 -eth $cloudn_interface -guestuser $guestuser -guestpass $guestpass -http_proxy $http_proxy -https_proxy $https_proxy
+	Write-Host "CloudN VM [$vm_name] was PoweredOff" -foreground red
+	Start-VM -VM $vm_name 
+	Write-Host "Powering ON and waiting 180sec for OS kernel to come up" -foreground cyan
+	Sleep 180
+	# Check installed VMware Tools inside VM
+    $GuestToolsStatus=(Get-View $vm.Id -Property Guest).Guest.ToolsStatus
+	
+	if($GuestToolsStatus -eq "toolsOK"){
+		Write-Host "VMWware Tools is OK" -foreground green
+		setNetworking -ip $cloudn_ip -netmask $cloudn_netmask -gateway $cloudn_gateway -dns1 $cloudn_dns1 -dns2 $cloudn_dns2 -guestuser $guestuser -guestpass 	$guestpass -http_proxy $http_proxy -https_proxy $https_proxy
+	}else{
+		Write-Host "vmtoolsd not running, please re-install VMware Tools to guest VM" -foreground red
+		Disconnect-VIServer -confirm:$false -Server $Server
+	}
 }
 
 	Disconnect-VIServer -confirm:$false -Server $Server
