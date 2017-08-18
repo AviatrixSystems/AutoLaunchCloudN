@@ -69,11 +69,11 @@ Parameters:"
 ```
 Sample command with proxy disabled
 ```no-proxy-parameters
-.\powercli_launch.ps1 -esxi_params ("10.130.0.2","root","password") -cloudn_network ("10.130.0.10","255.255.0.0","10.130.0.1" -cloudn_dns ("8.8.8.8",8.8.4.4") -vm_name "My-CloudN"
+.\powercli_launch.ps1 -esxi_params ("10.130.0.2","root","password") -cloudn_network ("10.130.0.10","255.255.0.0","10.130.0.1") -cloudn_dns ("8.8.8.8",8.8.4.4") -vm_name "My-CloudN"
 ```
 Sample command with proxy enabled
 ```proxy-parameters
-.\powercli_launch.ps1 -esxi_params ("10.130.0.2","root","password") -cloudn_network ("10.130.0.10","255.255.0.0","10.130.0.1" -cloudn_dns ("8.8.8.8",8.8.4.4")  -cloudn_proxy (http://10.130.0.15:3128,http://10.130.0.15:3128) -vm_name "My-CloudN"
+.\powercli_launch.ps1 -esxi_params ("10.130.0.2","root","password") -cloudn_network ("10.130.0.10","255.255.0.0","10.130.0.1") -cloudn_dns ("8.8.8.8",8.8.4.4")  -cloudn_proxy (http://10.130.0.15:3128,http://10.130.0.15:3128) -vm_name "My-CloudN"
 ```
  
 7. At the completion of the script, you should be able to access CloudN from its web console. Open a browser, and type https://CloudN-private-ip-address, where CloudN-private-ip-address is $cloudn_ip in the above customization code. 
