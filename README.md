@@ -60,12 +60,12 @@ Usage:"
     
 Parameters:"
     -help               : display this help"
-	-exsi_params    [ ] : ESXi host parameters (ip address, username, password)" 
+    -exsi_params    [ ] : ESXi host parameters (ip address, username, password)" 
     -cloudn_network [ ] : CloudN networking parameters (ip address, network, gateway)"
     -cloudn_dns     [ ] : List of domain nameservers (DNS #1 ip address, DSN #2 ip address)"
     -cloudn_proxy   [ ] : List of http and https proxy servers [http_proxy, https_proxy]"
                            i.e.   -cloudn_proxy (http://10.130.0.15:3128,http://10.130.0.15:3128)"
-	-vm_name            : virtual machine name deployed by ovftool or vSphere Client"
+    -vm_name            : virtual machine name deployed by ovftool or vSphere Client"
 ```
 Sample command with proxy disabled
 ```no-proxy-parameters
