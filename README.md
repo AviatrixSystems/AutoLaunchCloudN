@@ -1,7 +1,6 @@
 # AutoLaunchCloudN
 
-This script automates the initial process of setting up CloudN's IP address, network mask, default gateway, DNS servers and proxy settting. With this script, you do not
-need to manually go through the Booting Up and Initial Configuration section in CloudN startup guide. 
+This script automates the initial process of setting up CloudN's IP address, network mask, default gateway, DNS servers and proxy settting. With this script, you do not need to manually go through the Booting Up and Initial Configuration section in CloudN startup guide. 
 
 ## Launch CloudN VM
 Before you can use the script for the initial process, CloudN virtual machine has to be launched. Below is a 
@@ -53,19 +52,30 @@ git clone https://github.com/AviatrixSystems/AutoLaunchCloudN.git
 3. Once the VM is finished Deploying and powered on, go to your Window's PowerCli host, click and run the VMware vSphere PowerCLI shortcut as an administrator.
 4. From PowerCLI environment type "set-executionpolicy RemoteSigned" and answer [A] Yes to All.
 5. Do cd to the location of the powercli script
-6. Customize the CloudN information. In the script powercli_launch.ps1, csutomize the following fields:
+6. Type .\powercli_launch.ps1 and customize the following passing parameters:
 
-```parameters
-$cloudn_ip = "10.130.0.10"
-$cloudn_netmask = "255.255.0.0"
-$cloudn_gateway = "10.130.0.1"
-$cloudn_dns1 = "8.8.8.8"
-$cloudn_dns2 = "8.8.4.4"
-$http_proxy = ""
-$https_proxy = ""
+```usage
+Usage:"
+    powercli_launch [-help] | [-exsi_params [...]] [-cloudn_network [...]] [-cloudn_dns [...]] [-cloudn_proxy [...]] "
+    
+Parameters:"
+    -help               : display this help"
+	-exsi_params    [ ] : ESXi host parameters (ip address, username, password)" 
+    -cloudn_network [ ] : CloudN networking parameters (ip address, network, gateway)"
+    -cloudn_dns     [ ] : List of domain nameservers (DNS #1 ip address, DSN #2 ip address)"
+    -cloudn_proxy   [ ] : List of http and https proxy servers [http_proxy, https_proxy]"
+                           i.e.   -cloudn_proxy (http://10.130.0.15:3128,http://10.130.0.15:3128)"
+	-vm_name            : virtual machine name deployed by ovftool or vSphere Client"
 ```
-
-6. Type .\powercli_launch.ps1 -Server <ESXi Host IP address> -User <username> -Password <password>, where username is the login of the ESXi host and password is the password of the username for the ESXi host. 
+Sample command with proxy disabled
+```no-proxy-parameters
+.\powercli_launch.ps1 -esxi_params ("10.130.0.2","root","password") -cloudn_network ("10.130.0.10","255.255.0.0","10.130.0.1" -cloudn_dns ("8.8.8.8",8.8.4.4") -vm_name "My-CloudN"
+```
+Sample command with proxy enabled
+```proxy-parameters
+.\powercli_launch.ps1 -esxi_params ("10.130.0.2","root","password") -cloudn_network ("10.130.0.10","255.255.0.0","10.130.0.1" -cloudn_dns ("8.8.8.8",8.8.4.4")  -cloudn_proxy (http://10.130.0.15:3128,http://10.130.0.15:3128) -vm_name "My-CloudN"
+```
+ 
 7. At the completion of the script, you should be able to access CloudN from its web console. Open a browser, and type https://CloudN-private-ip-address, where CloudN-private-ip-address is $cloudn_ip in the above customization code. 
 
 
